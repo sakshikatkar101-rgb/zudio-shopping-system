@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <defs>
+    <linearGradient id="bgw" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#261622"/>
+      <stop offset="100%" stop-color="#120910"/>
+    </linearGradient>
+    <linearGradient id="pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2e63"/>
+      <stop offset="100%" stop-color="#ff758c"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#bgw)"/>
+  <circle cx="300" cy="350" r="130" fill="#20111d" stroke="#361a30" stroke-width="2"/>
+  <path d="M 270 290 Q 300 310 330 290 L 350 420 L 250 420 Z" fill="none" stroke="url(#pink)" stroke-width="4" stroke-linejoin="round"/>
+  <text x="300" y="530" text-anchor="middle" fill="#ffffff" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="900" font-size="34" letter-spacing="4">WOMEN'S EDIT</text>
+  <text x="300" y="565" text-anchor="middle" fill="#ff758c" font-family="system-ui, sans-serif" font-weight="600" font-size="16" letter-spacing="2">TRENDS &amp; OCCASION WEAR</text>
+</svg>

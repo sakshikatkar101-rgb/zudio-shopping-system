@@ -1,0 +1,11 @@
+target/
+.git/
+.gitignore
+.env
+tools/
+*.log
+.idea/
+.vscode/
+screenshots/
+run.bat
+run.ps1

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <defs>
+    <linearGradient id="bgk" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a2416"/>
+      <stop offset="100%" stop-color="#121008"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f6d365"/>
+      <stop offset="100%" stop-color="#fda085"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#bgk)"/>
+  <circle cx="300" cy="350" r="130" fill="#201a0e" stroke="#3b3117" stroke-width="2"/>
+  <circle cx="300" cy="330" r="30" fill="none" stroke="url(#gold)" stroke-width="4"/>
+  <path d="M 270 370 L 330 370 L 340 420 L 260 420 Z" fill="none" stroke="url(#gold)" stroke-width="4"/>
+  <text x="300" y="530" text-anchor="middle" fill="#ffffff" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="900" font-size="34" letter-spacing="4">KIDS CLUB</text>
+  <text x="300" y="565" text-anchor="middle" fill="#f6d365" font-family="system-ui, sans-serif" font-weight="600" font-size="16" letter-spacing="2">PLAYFUL EVERYDAY WEAR</text>
+</svg>

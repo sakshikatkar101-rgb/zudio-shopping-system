@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <defs>
+    <linearGradient id="bga" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22182a"/>
+      <stop offset="100%" stop-color="#0c0910"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b92b27"/>
+      <stop offset="100%" stop-color="#1565c0"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#bga)"/>
+  <circle cx="300" cy="350" r="130" fill="#1b1222" stroke="#2e1a3d" stroke-width="2"/>
+  <rect x="250" y="320" width="100" height="70" rx="10" fill="none" stroke="url(#purple)" stroke-width="4"/>
+  <circle cx="300" cy="355" r="15" fill="none" stroke="url(#purple)" stroke-width="3"/>
+  <text x="300" y="530" text-anchor="middle" fill="#ffffff" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="900" font-size="34" letter-spacing="4">ACCESSORIES</text>
+  <text x="300" y="565" text-anchor="middle" fill="#b92b27" font-family="system-ui, sans-serif" font-weight="600" font-size="16" letter-spacing="2">BAGS, CAPS, BELTS &amp; MORE</text>
+</svg>

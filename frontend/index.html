@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZUDIO – Fast Fashion & Online Shopping</title>
+  
+  <!-- Modern Editorial & Tech Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- 1. Glassmorphism Top Navigation -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <!-- Wordmark Logo -->
+      <a href="#/home" class="brand-logo">
+        ZUDIO<span>.</span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <ul class="nav-links">
+        <li><a href="#/home" class="nav-link active">Home</a></li>
+        <li><a href="#/shop" class="nav-link">Catalog</a></li>
+        <li><a href="#/orders" class="nav-link">My Orders</a></li>
+        <li class="admin-only-link" style="display: none;"><a href="#/admin" class="nav-link" style="color: var(--accent-primary);">Admin Console</a></li>
+      </ul>
+
+      <!-- Action Icons (Search, Theme, Wishlist, Cart, Profile) -->
+      <div class="nav-actions">
+        <!-- Dark/Light Mode Switcher -->
+        <button id="theme-toggle-btn" class="nav-icon-btn" onclick="UI.toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+
+        <!-- Wishlist Icon -->
+        <a href="#/wishlist" class="nav-icon-btn" title="Saved Wishlist" aria-label="Wishlist">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </a>
+
+        <!-- Cart Trigger with Badge -->
+        <button class="nav-icon-btn" onclick="Cart.openDrawer()" title="Shopping Bag" aria-label="Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="badge-count cart-badge-count" style="display: none;">0</span>
+        </button>
+
+        <!-- Auth Button (Guest) -->
+        <button id="nav-auth-btn" class="btn btn-primary btn-sm" onclick="Auth.openAuthModal('login')">
+          Sign In
+        </button>
+
+        <!-- Profile Dropdown (Logged In) -->
+        <div id="nav-profile-dropdown" class="profile-dropdown-wrapper" style="display: none;">
+          <button class="nav-icon-btn" style="border-color: var(--accent-primary);" aria-label="User Profile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </button>
+          <div class="dropdown-menu">
+            <div class="dropdown-header">
+              <div class="dropdown-user-name">User</div>
+              <div class="dropdown-user-email">email@example.com</div>
+            </div>
+            <div class="dropdown-item" onclick="window.Router.navigate('/orders')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              My Orders
+            </div>
+            <div class="dropdown-item" onclick="window.Router.navigate('/wishlist')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              Saved Wishlist
+            </div>
+            <div class="dropdown-item admin-only-link" onclick="window.Router.navigate('/admin')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              Admin Dashboard
+            </div>
+            <div class="dropdown-item" onclick="Auth.logout()" style="color: var(--accent-danger); border-top: 1px solid var(--border-subtle);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Log Out
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. Marquee Offers Strip -->
+  <div class="marquee-strip">
+    <div class="marquee-content">
+      <div class="marquee-item">⚡ FLAT 50% OFF ON NEW DROPS</div>
+      <div class="marquee-item">• FREE EXPRESS SHIPPING OVER ₹999</div>
+      <div class="marquee-item">• USE CODE: <strong>ZUDIO10</strong> FOR 10% OFF</div>
+      <div class="marquee-item">• OVER 30+ NEW URBAN STYLES</div>
+      <div class="marquee-item">• 14-DAY HASSLE FREE RETURNS</div>
+      <div class="marquee-item">• CASH ON DELIVERY AVAILABLE</div>
+    </div>
+    <div class="marquee-content" aria-hidden="true">
+      <div class="marquee-item">⚡ FLAT 50% OFF ON NEW DROPS</div>
+      <div class="marquee-item">• FREE EXPRESS SHIPPING OVER ₹999</div>
+      <div class="marquee-item">• USE CODE: <strong>ZUDIO10</strong> FOR 10% OFF</div>
+      <div class="marquee-item">• OVER 30+ NEW URBAN STYLES</div>
+      <div class="marquee-item">• 14-DAY HASSLE FREE RETURNS</div>
+      <div class="marquee-item">• CASH ON DELIVERY AVAILABLE</div>
+    </div>
+  </div>
+
+  <!-- 3. SPA Views Container -->
+  <main id="app-viewport">
+    
+    <!-- A. HOME VIEW -->
+    <section id="home-view" class="app-view">
+      <!-- Split Hero Section -->
+      <section class="hero-section">
+        <div class="hero-mesh-bg"></div>
+        <div class="container hero-grid">
+          <div class="hero-content">
+            <span class="section-tag">SUMMER / AUTUMN 2026 DROP</span>
+            <h1 class="hero-headline">
+              BOLD LOOKS.<br>
+              <span class="text-gradient">FAST FASHION.</span><br>
+              UNBEATABLE.
+            </h1>
+            <p class="hero-subhead">
+              Curated everyday streetwear, premium casuals, and statement apparel tailored for modern youth. Starting at just ₹199 with instant doorstep delivery.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" onclick="window.Router.navigate('/shop')">
+                Explore The Drop
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+              <button class="btn btn-secondary" onclick="Shop.setCategory('Men'); window.Router.navigate('/shop');">
+                Men's Wear
+              </button>
+              <button class="btn btn-secondary" onclick="Shop.setCategory('Women'); window.Router.navigate('/shop');">
+                Women's Wear
+              </button>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="hero-card-main">
+              <span class="hero-card-badge">HOT SELLER</span>
+              <img src="https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80" alt="Hero Outfit">
+            </div>
+            <div class="hero-card-floating">
+              <div style="width: 44px; height: 44px; border-radius: 99px; background: rgba(255, 46, 99, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-primary);">
+                ★
+              </div>
+              <div>
+                <div style="font-weight: 800; font-size: 0.95rem;">4.8 / 5 Rating</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">From 25,000+ Happy Shoppers</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category Tiles Section -->
+      <section class="container" style="padding-top: var(--space-2xl);">
+        <div class="section-header">
+          <span class="section-tag">CURATED AISLES</span>
+          <h2>Shop By Category</h2>
+          <p>Find the perfect fit across our five signature high-fashion departments.</p>
+        </div>
+        <div class="category-grid" id="home-category-grid">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Trending Drops Showcase -->
+      <section class="container" style="padding: var(--space-2xl) 0 var(--space-3xl);">
+        <div class="section-header">
+          <span class="section-tag">MOST WANTED</span>
+          <h2>Trending Right Now</h2>
+          <p>High-demand apparel and sneakers selling out fast this week.</p>
+        </div>
+        <div class="product-grid" id="home-trending-grid">
+          <!-- Populated by JS -->
+        </div>
+        <div style="text-align: center; margin-top: var(--space-2xl);">
+          <button class="btn btn-secondary" onclick="window.Router.navigate('/shop')">
+            View All 30+ Products In Catalog →
+          </button>
+        </div>
+      </section>
+
+      <!-- Brand Perks Strip -->
+      <section style="background: var(--bg-surface); border-top: 1px solid var(--border-subtle); padding: var(--space-2xl) 0;">
+        <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-lg); text-align: center;">
+          <div>
+            <div style="font-size: 1.8rem; margin-bottom: 6px;">⚡</div>
+            <div style="font-weight: 700; margin-bottom: 4px;">Express Fast Shipping</div>
+            <p style="font-size: 0.8rem;">Free shipping on orders above ₹999 across India.</p>
+          </div>
+          <div>
+            <div style="font-size: 1.8rem; margin-bottom: 6px;">🔄</div>
+            <div style="font-weight: 700; margin-bottom: 4px;">14-Day Easy Exchange</div>
+            <p style="font-size: 0.8rem;">No questions asked returns & doorstep exchanges.</p>
+          </div>
+          <div>
+            <div style="font-size: 1.8rem; margin-bottom: 6px;">🛡️</div>
+            <div style="font-weight: 700; margin-bottom: 4px;">100% Quality Inspected</div>
+            <p style="font-size: 0.8rem;">Direct retail production grade materials & stitching.</p>
+          </div>
+          <div>
+            <div style="font-size: 1.8rem; margin-bottom: 6px;">💵</div>
+            <div style="font-weight: 700; margin-bottom: 4px;">Cash on Delivery</div>
+            <p style="font-size: 0.8rem;">Pay cash or UPI at your doorstep upon arrival.</p>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- B. SHOP CATALOG VIEW -->
+    <section id="shop-view" class="app-view" style="display: none;">
+      <div class="container" style="padding-top: var(--space-2xl); padding-bottom: var(--space-3xl);">
+        <div style="margin-bottom: var(--space-xl);">
+          <span class="section-tag">COLLECTION DISCOVERY</span>
+          <h1>All Fashion Drops</h1>
+        </div>
+
+        <!-- Filter & Search Control Bar -->
+        <div class="shop-filters-bar">
+          <div class="filter-categories-pills" id="filter-categories-container">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div style="display: flex; gap: var(--space-sm); align-items: center; flex-wrap: wrap;">
+            <div class="search-input-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="shop-search-input" placeholder="Search tee, hoodie, cargo...">
+            </div>
+
+            <select id="shop-sort-select" onchange="Shop.handleSort(this.value)">
+              <option value="popularity">Sort: Most Popular</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="rating">Highest Rated</option>
+              <option value="newest">Newest Drops</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Catalog Product Grid -->
+        <div class="product-grid" id="shop-product-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- C. CHECKOUT VIEW -->
+    <section id="checkout-view" class="app-view" style="display: none;">
+      <!-- Populated dynamically by Checkout.js -->
+    </section>
+
+    <!-- D. MY ORDERS VIEW -->
+    <section id="orders-view" class="app-view" style="display: none;">
+      <!-- Populated dynamically by Orders.js -->
+    </section>
+
+    <!-- E. WISHLIST VIEW -->
+    <section id="wishlist-view" class="app-view" style="display: none;">
+      <div class="container" style="padding-top: var(--space-2xl); padding-bottom: var(--space-3xl);">
+        <div style="margin-bottom: var(--space-xl);">
+          <span class="section-tag">SAVED STYLES</span>
+          <h1>My Wishlist</h1>
+        </div>
+        <div class="product-grid" id="wishlist-product-grid">
+          <!-- Populated by Wishlist.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- F. ADMIN VIEW -->
+    <section id="admin-view" class="app-view" style="display: none;">
+      <!-- Populated dynamically by Admin.js -->
+    </section>
+
+  </main>
+
+  <!-- 4. Slide-in Shopping Bag / Cart Drawer -->
+  <div class="cart-drawer-overlay" id="cart-drawer-overlay" onclick="if(event.target===this) Cart.closeDrawer();">
+    <div class="cart-drawer">
+      <div class="cart-drawer-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <h3 style="font-size: 1.25rem;">Shopping Bag</h3>
+        </div>
+        <button class="nav-icon-btn" onclick="Cart.closeDrawer()" aria-label="Close Cart">✕</button>
+      </div>
+
+      <div class="cart-drawer-body" id="cart-drawer-body">
+        <!-- Rendered by Cart.js -->
+      </div>
+
+      <div class="cart-drawer-footer" id="cart-drawer-footer">
+        <!-- Rendered by Cart.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Product Detail Modal -->
+  <div class="modal-overlay" id="product-detail-modal">
+    <div class="modal-content" style="max-width: 840px;">
+      <button class="modal-close-btn" onclick="UI.closeModal('product-detail-modal')" aria-label="Close">✕</button>
+      <div id="product-detail-modal-body" style="padding: var(--space-2xl);">
+        <!-- Populated by Shop.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Auth Modal (Sign In / Sign Up) -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-content" style="max-width: 440px;">
+      <button class="modal-close-btn" onclick="UI.closeModal('auth-modal')" aria-label="Close">✕</button>
+      <div style="padding: var(--space-2xl);">
+        <!-- Tabs -->
+        <div style="display: flex; border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--space-lg);">
+          <button id="tab-login-btn" class="nav-link active" style="flex: 1; text-align: center; padding-bottom: 10px;" onclick="Auth.switchTab('login')">
+            Sign In
+          </button>
+          <button id="tab-register-btn" class="nav-link" style="flex: 1; text-align: center; padding-bottom: 10px;" onclick="Auth.switchTab('register')">
+            Register
+          </button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" onsubmit="event.preventDefault(); Auth.login(document.getElementById('login-email').value, document.getElementById('login-pass').value);">
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px;">Email Address</label>
+              <input type="email" id="login-email" required value="sakshi@example.com" placeholder="name@example.com" style="width: 100%;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px;">Password</label>
+              <input type="password" id="login-pass" required value="pass123" placeholder="••••••••" style="width: 100%;">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 8px;">Sign In to Account</button>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+              Default Customer: <code>sakshi@example.com</code> / <code>pass123</code><br>
+              Default Admin: <code>admin@zudio.in</code> / <code>admin123</code>
+            </div>
+          </div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="register-form" style="display: none;" onsubmit="event.preventDefault(); Auth.register(document.getElementById('reg-name').value, document.getElementById('reg-email').value, document.getElementById('reg-pass').value, document.getElementById('reg-phone').value);">
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px;">Full Name</label>
+              <input type="text" id="reg-name" required placeholder="Aarav Mehta" style="width: 100%;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px;">Email Address</label>
+              <input type="email" id="reg-email" required placeholder="aarav@example.com" style="width: 100%;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px;">Mobile Number</label>
+              <input type="tel" id="reg-phone" placeholder="+91 98765 43210" style="width: 100%;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px;">Create Password</label>
+              <input type="password" id="reg-pass" required minlength="6" placeholder="Min. 6 characters" style="width: 100%;">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 8px;">Create My Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Admin Add/Edit Product Modal -->
+  <div class="modal-overlay" id="admin-product-modal">
+    <div class="modal-content" style="max-width: 620px;">
+      <button class="modal-close-btn" onclick="UI.closeModal('admin-product-modal')" aria-label="Close">✕</button>
+      <div id="admin-product-modal-body" style="padding: var(--space-2xl);">
+        <!-- Populated by Admin.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav">
+    <a href="#/home" class="nav-icon-btn" title="Home" style="border: none;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
+    <a href="#/shop" class="nav-icon-btn" title="Catalog" style="border: none;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </a>
+    <button class="nav-icon-btn" onclick="Cart.openDrawer()" style="border: none;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span class="badge-count cart-badge-count" style="display: none;">0</span>
+    </button>
+    <a href="#/orders" class="nav-icon-btn" title="Orders" style="border: none;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+    </a>
+  </nav>
+
+  <!-- Footer -->
+  <footer style="background: var(--bg-surface); border-top: 1px solid var(--border-subtle); padding: var(--space-3xl) 0 var(--space-2xl);">
+    <div class="container" style="display: flex; flex-direction: column; gap: var(--space-2xl);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-lg);">
+        <div>
+          <div class="brand-logo" style="margin-bottom: 6px;">ZUDIO<span>.</span></div>
+          <p style="font-size: 0.85rem; max-width: 380px;">Trendy fast fashion inspired shopping management system. Academic project demonstration.</p>
+        </div>
+        <div style="display: flex; gap: var(--space-xl); font-size: 0.85rem; color: var(--text-secondary); flex-wrap: wrap;">
+          <a href="#/home">Home</a>
+          <a href="#/shop">All Products</a>
+          <a href="#/orders">Track Orders</a>
+          <a href="#/wishlist">Wishlist</a>
+          <a href="#/admin" class="admin-only-link" style="display: none; color: var(--accent-primary);">Admin Console</a>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: var(--space-lg); font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap; gap: 8px;">
+        <div>© 2026 ZUDIO Online Shopping Management System. All rights reserved.</div>
+        <div>Built with Core Java 17+, Pure JDBC, MySQL 8, Vanilla HTML5/CSS3/ES6+</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/checkout.js"></script>
+  <script src="js/orders.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

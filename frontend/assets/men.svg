@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <defs>
+    <linearGradient id="bgm" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181e28"/>
+      <stop offset="100%" stop-color="#0a0d14"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38ef7d"/>
+      <stop offset="100%" stop-color="#11998e"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#bgm)"/>
+  <circle cx="300" cy="350" r="130" fill="#141c24" stroke="#223242" stroke-width="2"/>
+  <path d="M 260 300 L 340 300 L 325 410 L 275 410 Z" fill="none" stroke="url(#glow)" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 285 300 L 300 330 L 315 300" fill="none" stroke="url(#glow)" stroke-width="3"/>
+  <text x="300" y="530" text-anchor="middle" fill="#ffffff" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="900" font-size="34" letter-spacing="4">MEN'S COLLECTION</text>
+  <text x="300" y="565" text-anchor="middle" fill="#38ef7d" font-family="system-ui, sans-serif" font-weight="600" font-size="16" letter-spacing="2">CASUALS &amp; STREETWEAR</text>
+</svg>

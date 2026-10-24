@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <defs>
+    <linearGradient id="bgf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#16222a"/>
+      <stop offset="100%" stop-color="#0a1014"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c6ff"/>
+      <stop offset="100%" stop-color="#0072ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#bgf)"/>
+  <circle cx="300" cy="350" r="130" fill="#121b22" stroke="#1c303f" stroke-width="2"/>
+  <path d="M 240 370 C 270 350, 310 360, 340 340 L 360 370 C 330 380, 270 385, 240 370 Z" fill="none" stroke="url(#cyan)" stroke-width="4" stroke-linejoin="round"/>
+  <text x="300" y="530" text-anchor="middle" fill="#ffffff" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="900" font-size="34" letter-spacing="4">FOOTWEAR</text>
+  <text x="300" y="565" text-anchor="middle" fill="#00c6ff" font-family="system-ui, sans-serif" font-weight="600" font-size="16" letter-spacing="2">SNEAKERS, SLIDERS &amp; FLATS</text>
+</svg>
