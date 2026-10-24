@@ -837,3 +837,188 @@
     padding-bottom: 70px;
   }
 }
+
+/* =========================================================
+   11. Simulated Payment & Order Cancellation Enhancements
+   ========================================================= */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Payment Status Badges */
+.badge-payment {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-paid {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-refund {
+  background: rgba(139, 92, 246, 0.15);
+  color: #A78BFA;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+.badge-refunded {
+  background: rgba(6, 182, 212, 0.15);
+  color: #06B6D4;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.badge-failed {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Simulated Credit Card Visual */
+.card-visual-wrapper {
+  background: linear-gradient(135deg, #1f1f2e 0%, #111119 50%, #291528 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  color: #FFFFFF;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.card-visual-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(255, 46, 99, 0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.card-visual-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.card-chip-icon {
+  width: 38px;
+  height: 28px;
+  background: linear-gradient(135deg, #e0aa3e 0%, #f7d57f 50%, #c48b28 100%);
+  border-radius: 5px;
+  position: relative;
+}
+
+.card-chip-icon::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 6px;
+  right: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 2px;
+}
+
+.card-brand-tag {
+  font-family: var(--font-brand);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.card-number-display {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 1.25rem;
+  letter-spacing: 0.18em;
+  color: #FFFFFF;
+  margin-bottom: 18px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.card-visual-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.08em;
+}
+
+.card-holder-name {
+  font-weight: 700;
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.card-expiry-val {
+  font-weight: 700;
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+/* UPI Quick Chips */
+.upi-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.upi-chip-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.upi-chip-btn:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Order Cancellation Banner */
+.cancel-reason-callout {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(239, 68, 68, 0.08);
+  border-left: 4px solid var(--accent-danger);
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+

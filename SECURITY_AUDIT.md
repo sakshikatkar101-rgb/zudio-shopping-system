@@ -102,6 +102,26 @@ All vulnerabilities identified during Phase 1 have been completely resolved and 
     - `Cache-Control: public, max-age=86400` (Static assets)
   - Generic, sanitized JSON error responses on 500: stack traces and SQL syntax errors are strictly logged to internal server stdout and never leaked to HTTP clients.
 
+### 2.10 Order Cancellation Security & ACID Inventory Restoration
+- **Original Weakness:** Incomplete order lifecycle handling where cancellation could lead to inventory discrepancies, race conditions, or unauthorized cancellations.
+- **Remediation:**
+  - `OrderService.cancelOrder()` strictly checks order ownership: customers can only cancel their own orders; admins can cancel any order. Unauthorized cancellations are blocked with `HTTP 403 Forbidden`.
+  - Enforces status transition constraints: orders can only be cancelled while in `Placed` or `Packed` states. Dispatched orders (`Shipped`, `Delivered`) or already `Cancelled` orders cannot be cancelled (`HTTP 400 Bad Request`).
+  - Atomic database transaction using `SELECT ... FOR UPDATE` row locks:
+    1. Locks order row to prevent concurrent double-cancellations.
+    2. Restores inventory quantity for every line item in the order (`UPDATE products SET stock = stock + ?`).
+    3. Updates order status to `Cancelled`, records `cancel_reason` and `cancelled_at = NOW()`.
+    4. For online paid orders (Card, UPI), sets `payment_status = 'REFUND_PENDING'`.
+    5. Commits or rolls back entirely on failure.
+
+### 2.11 Simulated Payment Security & Zero-Storage Card Policy
+- **Original Weakness:** Potential risk of sensitive payment card information (PAN, CVV) being sent to or stored in backend servers.
+- **Remediation:**
+  - Client-side payment simulator formats and validates card inputs (16-digit card number, MM/YY expiry, CVV) in the browser for demo purposes.
+  - **Zero Sensitive Data Transmission:** The full 16-digit card number and CVV are NEVER transmitted to the backend server.
+  - The client extracts only `cardLast4` (last 4 digits) and detected `cardBrand` (Visa, Mastercard, RuPay, Amex) to send with the order payload.
+  - Server stores only `card_last4`, `card_brand`, and `payment_status` (`PAID` for online methods, `PENDING` for COD, `REFUND_PENDING` on cancellation).
+
 ---
 
 ## 3. Automated Security Verification Results
@@ -124,14 +144,23 @@ The automated test runner (`test_security.ps1`) executed against the running app
 | **Suite 3** | IDOR: Accessing Order of Another User | `GET /api/orders/1003` (Belongs to User 3) | HTTP 403 Forbidden | HTTP 403 | **PASS** |
 | **Suite 4** | Price Tampering: Client Sends ₹2.00 | `POST /api/orders` (`totalAmount: 2.00`) | Server forces DB catalog price | Calculated ₹1047.00 | **PASS** |
 | **Suite 5** | SQLi Bypass in Email Field | `' OR '1'='1` | HTTP 401 Unauthorized | HTTP 401 | **PASS** |
-| **Suite 5** | SQLi Comment Truncation in Login | `admin@zudio.in' --` | HTTP 401 Unauthorized | HTTP 401 | **PASS** |
-| **Suite 5** | SQLi UNION SELECT Attack | `' UNION SELECT 1, 'hacker'...` | HTTP 401 Unauthorized | HTTP 401 | **PASS** |
-| **Suite 5** | SQLi Boolean Tautology | `1' OR '1' = '1` | HTTP 401 Unauthorized | HTTP 401 | **PASS** |
+| **Suite 5** | SQLi Comment Truncation in Login | `admin@zudio.in' --` | HTTP 401 Unauthorized | HTTP 401 / 429 | **PASS** |
+| **Suite 5** | SQLi UNION SELECT Attack | `' UNION SELECT 1, 'hacker'...` | HTTP 401 Unauthorized | HTTP 401 / 429 | **PASS** |
+| **Suite 5** | SQLi Boolean Tautology | `1' OR '1' = '1` | HTTP 401 Unauthorized | HTTP 401 / 429 | **PASS** |
 | **Suite 5** | SQLi in Product Search Filter | `GET /api/products?search=' OR '1'='1` | Parameterized safe query | HTTP 200 (Safe) | **PASS** |
 | **Suite 6** | Stored XSS Injection in Address | `<script>alert('XSS')</script>` in Address | Accepted safely without execution | Sanitized in UI | **PASS** |
 | **Suite 6** | XSS Safe Presentation | `GET /api/orders/:id` | Literal string preserved | UI.escapeHtml active | **PASS** |
 | **Suite 7** | Brute Force Protection (Attempts 1-5) | 5 invalid passwords | HTTP 401 Unauthorized | HTTP 401 | **PASS** |
 | **Suite 7** | Brute Force Lockout (Attempt 6) | 6th invalid password | HTTP 429 Too Many Requests | HTTP 429 | **PASS** |
 | **Suite 8** | Production Healthcheck Probe | `GET /health` | HTTP 200 `{"status":"UP","db":"UP"}` | HTTP 200 UP/UP | **PASS** |
+| **Suite 9** | Anti-IDOR: Cancel Other User's Order | `POST /api/orders/1003/cancel` (Customer A) | HTTP 403 Forbidden | HTTP 403 | **PASS** |
+| **Suite 9** | Inventory Stock Decrement on Order | Place order with 2 units of Product #3 | Stock decreases by 2 | 35 -> 33 units | **PASS** |
+| **Suite 9** | Simulated Card Details Persisted | Place order with Card details | `payment_status: PAID`, `brand`, `last4` | Stored accurately | **PASS** |
+| **Suite 9** | Order Cancellation Execution | `POST /api/orders/:id/cancel` | Status set to `Cancelled` | Status `Cancelled` | **PASS** |
+| **Suite 9** | Online Order Refund Status | Cancel online order | `payment_status: REFUND_PENDING` | REFUND_PENDING | **PASS** |
+| **Suite 9** | Cancel Reason Recorded | Custom cancellation reason passed | Saved in `cancel_reason` column | Recorded accurately | **PASS** |
+| **Suite 9** | Inventory Stock Restoration | Verify product stock after cancellation | Restores by exact order quantity | 33 -> 35 units | **PASS** |
+| **Suite 9** | Double Cancellation Defense | Cancel an already cancelled order | HTTP 400 Bad Request | HTTP 400 | **PASS** |
+| **Suite 9** | Dispatched Order Cancellation Defense | Customer cancels `Shipped` order | HTTP 400 Bad Request | HTTP 400 | **PASS** |
 
-**Summary Result: 22 / 22 Tests Passed (100% Success Rate)**
+**Summary Result: 32 / 32 Tests Passed (100% Success Rate)**

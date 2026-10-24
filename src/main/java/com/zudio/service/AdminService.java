@@ -14,6 +14,7 @@ public class AdminService {
     private final OrderDAO orderDAO = new OrderDAO();
     private final ProductDAO productDAO = new ProductDAO();
     private final UserDAO userDAO = new UserDAO();
+    private final OrderService orderService = new OrderService();
 
     public Map<String, Object> getDashboardData() {
         Map<String, Object> kpis = orderDAO.getAdminKPIs();
@@ -27,8 +28,8 @@ public class AdminService {
         return orderDAO.listAll();
     }
 
-    public boolean updateOrderStatus(int orderId, String newStatus) {
-        return orderDAO.updateStatus(orderId, newStatus);
+    public boolean updateOrderStatus(int orderId, String newStatus) throws Exception {
+        return orderService.updateStatus(orderId, newStatus);
     }
 
     public List<User> getAllCustomers() {

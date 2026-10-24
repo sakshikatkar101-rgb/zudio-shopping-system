@@ -69,12 +69,18 @@ CREATE TABLE IF NOT EXISTS orders (
     discount DECIMAL(10, 2) DEFAULT 0.00,
     status VARCHAR(30) NOT NULL DEFAULT 'Placed', -- 'Placed', 'Packed', 'Shipped', 'Delivered', 'Cancelled'
     payment_method VARCHAR(50) NOT NULL, -- 'COD', 'UPI', 'CARD'
+    payment_status VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'PAID', 'FAILED', 'REFUND_PENDING', 'REFUNDED'
+    cancel_reason VARCHAR(255),
+    cancelled_at TIMESTAMP NULL,
+    card_last4 VARCHAR(4),
+    card_brand VARCHAR(20),
     address TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_order_user FOREIGN KEY (user_id) 
         REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_order_user (user_id),
-    INDEX idx_order_status (status)
+    INDEX idx_order_status (status),
+    INDEX idx_order_payment_status (payment_status)
 ) ENGINE=InnoDB;
 
 -- 6. Order Items Table

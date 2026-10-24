@@ -28,7 +28,9 @@
 - **Packaging & Portability:** Single executable fat JAR (`target/zudio.jar`) built with `maven-shade-plugin`, multi-stage Dockerfile, and `docker-compose.yml` with MySQL 8.4 service.
 - **Production Health Monitoring:** `GET /health` endpoint reporting `{"status":"UP","db":"UP"}`.
 - **ACID Transaction Control:** Order placement decrements inventory stock and creates order records within an atomic database transaction with `commit` and `rollback`.
-- **Pure SVG Charting:** Custom sales velocity trend graph crafted with raw SVG bezier curves (zero external chart libraries).
+- **Order Cancellation & Stock Restoration:** Customers (and administrators) can cancel orders in `Placed` or `Packed` status. Stock is atomically restored to products, status changes to `Cancelled`, reason and timestamp are saved, and simulated refunds are initiated for online payments.
+- **Realistic Simulated Payments:** Interactive Card modal (auto-formatting, brand detection for Visa/Mastercard/RuPay/Amex, live preview card) and UPI (quick handles `@oksbi`, `@okhdfcbank`, `@paytm`, `@ybl`) with simulated gateway authorization delays. Zero sensitive card data is ever stored or transmitted.
+- **Pure SVG Charting:** Custom sales velocity trend graph crafted with raw SVG bezier curves (zero external chart libraries). Non-cancelled orders are accurately filtered.
 - **Single Page Application (SPA):** Hash routing (`#/home`, `#/shop`, `#/product/:id`, `#/cart`, `#/checkout`, `#/orders`, `#/admin`) with smooth micro-interactions.
 
 ---
@@ -112,7 +114,7 @@ To run the automated security test suite against a running server:
 ```powershell
 powershell -ExecutionPolicy Bypass -File test_security.ps1
 ```
-This executes 22 automated vulnerability probes covering:
+This executes 32 automated vulnerability and integrity probes covering:
 1. Directory path traversal & protected file blocking (HTTP 403)
 2. Privilege escalation & customer-to-admin RBAC (HTTP 403)
 3. Insecure Direct Object Reference (IDOR) on orders (HTTP 403)
@@ -121,6 +123,11 @@ This executes 22 automated vulnerability probes covering:
 6. Stored XSS defense & HTML entity sanitization
 7. Brute-force credential lockout (HTTP 429 after 5 failed attempts)
 8. Production `/health` probe (HTTP 200 UP)
+9. Anti-IDOR order cancellation defense (HTTP 403)
+10. Atomic inventory stock decrement on checkout & restoration on cancellation
+11. Simulated card and payment status persistence (`PAID`, `REFUND_PENDING`)
+12. Duplicate cancellation prevention (HTTP 400)
+13. Dispatched order (Shipped/Delivered) cancellation rejection (HTTP 400)
 
 ---
 
@@ -148,9 +155,10 @@ This executes 22 automated vulnerability probes covering:
 - `DELETE /api/cart/clear` – Empty entire bag
 
 ### Orders (`/api/orders`)
-- `GET  /api/orders` – View order history with fulfillment timeline
+- `GET  /api/orders` – View order history with fulfillment timeline and payment badges
 - `GET  /api/orders/{id}` – View single order breakdown
-- `POST /api/orders` – Place order with ACID transaction & stock reduction (`{ paymentMethod, address, couponCode }`)
+- `POST /api/orders` – Place order with ACID transaction & stock reduction (`{ paymentMethod, address, couponCode, paymentStatus, cardLast4, cardBrand }`)
+- `POST /api/orders/{id}/cancel` – Cancel order, restore stock, initiate simulated refund (`{ reason }`)
 
 ### Saved Wishlist (`/api/wishlist`)
 - `GET    /api/wishlist` – View customer's saved items

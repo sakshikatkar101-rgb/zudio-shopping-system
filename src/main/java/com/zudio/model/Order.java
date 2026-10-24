@@ -14,6 +14,11 @@ public class Order {
     private BigDecimal discount;
     private String status; // 'Placed', 'Packed', 'Shipped', 'Delivered', 'Cancelled'
     private String paymentMethod; // 'COD', 'UPI', 'CARD'
+    private String paymentStatus; // 'PENDING', 'PAID', 'FAILED', 'REFUND_PENDING', 'REFUNDED'
+    private String cancelReason;
+    private Timestamp cancelledAt;
+    private String cardLast4;
+    private String cardBrand;
     private String address;
     private Timestamp createdAt;
     private List<OrderItem> items = new ArrayList<>();
@@ -43,6 +48,21 @@ public class Order {
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public String getCancelReason() { return cancelReason; }
+    public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
+
+    public Timestamp getCancelledAt() { return cancelledAt; }
+    public void setCancelledAt(Timestamp cancelledAt) { this.cancelledAt = cancelledAt; }
+
+    public String getCardLast4() { return cardLast4; }
+    public void setCardLast4(String cardLast4) { this.cardLast4 = cardLast4; }
+
+    public String getCardBrand() { return cardBrand; }
+    public void setCardBrand(String cardBrand) { this.cardBrand = cardBrand; }
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }

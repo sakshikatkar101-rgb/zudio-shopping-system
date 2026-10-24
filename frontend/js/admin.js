@@ -374,6 +374,8 @@ const Admin = {
   },
 
   // 3. Orders Management Tab
+  orderFilter: 'ALL',
+
   async loadOrders() {
     const main = document.getElementById('admin-main-content');
     if (!main) return;
@@ -383,32 +385,87 @@ const Admin = {
     try {
       const res = await API.get('/admin/orders');
       this.ordersList = res.data || [];
+      this.renderOrdersTable();
+    } catch (e) {
+      main.innerHTML = `<div style="padding: 32px; color: var(--accent-danger);">Error loading orders: ${UI.escapeHtml(e.message)}</div>`;
+    }
+  },
 
-      main.innerHTML = `
-        <div style="margin-bottom: var(--space-xl); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-          <div>
-            <h1>Orders Management (${this.ordersList.length})</h1>
-            <p>Track customer fulfillment, update status, and manage payments</p>
-          </div>
+  setOrderFilter(status) {
+    this.orderFilter = status;
+    this.renderOrdersTable();
+  },
+
+  renderOrdersTable() {
+    const main = document.getElementById('admin-main-content');
+    if (!main) return;
+
+    const filtered = (this.orderFilter === 'ALL')
+      ? this.ordersList
+      : this.ordersList.filter(o => o.status === this.orderFilter);
+
+    main.innerHTML = `
+      <div style="margin-bottom: var(--space-xl); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h1>Orders Management (${this.ordersList.length})</h1>
+          <p>Track customer fulfillment, update status, and manage simulated refunds</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <!-- Status Filter -->
+          <select id="admin-order-filter" class="status-select" style="padding: 8px 12px; font-weight: 600;" onchange="Admin.setOrderFilter(this.value)">
+            <option value="ALL" ${this.orderFilter === 'ALL' ? 'selected' : ''}>All Orders (${this.ordersList.length})</option>
+            <option value="Placed" ${this.orderFilter === 'Placed' ? 'selected' : ''}>Placed</option>
+            <option value="Packed" ${this.orderFilter === 'Packed' ? 'selected' : ''}>Packed</option>
+            <option value="Shipped" ${this.orderFilter === 'Shipped' ? 'selected' : ''}>Shipped</option>
+            <option value="Delivered" ${this.orderFilter === 'Delivered' ? 'selected' : ''}>Delivered</option>
+            <option value="Cancelled" ${this.orderFilter === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+          </select>
           <button class="btn btn-secondary btn-sm" onclick="Admin.loadOrders()">↻ Refresh</button>
         </div>
+      </div>
 
-        <div class="table-card">
-          <div class="data-table-wrapper">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Customer</th>
-                  <th>Total Amount</th>
-                  <th>Payment</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Update Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.ordersList.map(o => `
+      <div class="table-card">
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Total Amount</th>
+                <th>Payment Details</th>
+                <th>Fulfillment Status</th>
+                <th>Date</th>
+                <th>Update Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.length === 0 ? `
+                <tr><td colspan="7" style="text-align: center; padding: 36px; color: var(--text-muted);">No orders match the selected filter.</td></tr>
+              ` : filtered.map(o => {
+                // Payment Status Badge
+                let pBadge = '';
+                const pStatus = (o.paymentStatus || 'PENDING').toUpperCase();
+                if (pStatus === 'PAID') {
+                  pBadge = '<span class="badge-payment badge-paid">● Paid</span>';
+                } else if (pStatus === 'REFUND_PENDING') {
+                  pBadge = '<span class="badge-payment badge-refund">● Refund Pending</span>';
+                } else if (pStatus === 'REFUNDED') {
+                  pBadge = '<span class="badge-payment badge-refunded">● Refunded</span>';
+                } else {
+                  pBadge = '<span class="badge-payment badge-pending">● Pending</span>';
+                }
+
+                // Payment Method Line
+                let pMethodLine = UI.escapeHtml(o.paymentMethod || 'COD');
+                if (o.paymentMethod === 'CARD') {
+                  pMethodLine = `💳 ${UI.escapeHtml(o.cardBrand || 'Card')} •••• ${UI.escapeHtml(o.cardLast4 || '••••')}`;
+                } else if (o.paymentMethod === 'UPI') {
+                  pMethodLine = `⚡ UPI`;
+                } else {
+                  pMethodLine = `💵 COD`;
+                }
+
+                return `
                   <tr>
                     <td><strong>#${o.id}</strong></td>
                     <td>
@@ -418,35 +475,59 @@ const Admin = {
                       </div>
                     </td>
                     <td style="font-family: var(--font-brand); font-weight: 700; color: var(--accent-primary);">₹${Number(o.totalAmount).toFixed(2)}</td>
-                    <td><span class="status-pill status-Placed">${UI.escapeHtml(o.paymentMethod)}</span></td>
-                    <td><span class="status-pill status-${o.status}">${UI.escapeHtml(o.status)}</span></td>
+                    <td>
+                      <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                        <span style="font-size: 0.8rem; font-weight: 600;">${pMethodLine}</span>
+                        ${pBadge}
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                        <span class="status-pill status-${o.status}">${UI.escapeHtml(o.status)}</span>
+                        ${o.status === 'Cancelled' ? `
+                          <div style="font-size: 0.72rem; color: var(--accent-danger); max-width: 180px; line-height: 1.2;">
+                            ${UI.escapeHtml(o.cancelReason || 'Cancelled')}
+                          </div>
+                        ` : ''}
+                      </div>
+                    </td>
                     <td style="font-size: 0.8rem; color: var(--text-muted);">${new Date(o.createdAt).toLocaleDateString()}</td>
                     <td>
-                      <select class="status-select" onchange="Admin.updateOrderStatus(${o.id}, this.value)">
+                      <select class="status-select" onchange="Admin.updateOrderStatus(${o.id}, this.value, '${o.status}')">
                         ${['Placed', 'Packed', 'Shipped', 'Delivered', 'Cancelled'].map(s => `
                           <option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>
                         `).join('')}
                       </select>
                     </td>
                   </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
         </div>
-      `;
-    } catch (e) {
-      main.innerHTML = `<div style="padding: 32px; color: var(--accent-danger);">Error loading orders: ${e.message}</div>`;
-    }
+      </div>
+    `;
   },
 
-  async updateOrderStatus(orderId, newStatus) {
+  async updateOrderStatus(orderId, newStatus, prevStatus) {
+    if (newStatus === prevStatus) return;
+
+    if (newStatus === 'Cancelled') {
+      const confirmCancel = confirm(`Are you sure you want to cancel Order #${orderId}?\nThis will immediately restore stock for all items in the order back to inventory.`);
+      if (!confirmCancel) {
+        this.renderOrdersTable();
+        return;
+      }
+    }
+
     try {
+      UI.toast(`Updating Order #${orderId} to ${newStatus}...`, 'info');
       await API.put(`/admin/orders/${orderId}`, { status: newStatus });
-      UI.toast(`Order #${orderId} marked as ${newStatus}`, 'success');
-      this.loadOrders();
+      UI.toast(`Order #${orderId} status updated to ${newStatus}`, 'success');
+      await this.loadOrders();
     } catch (e) {
       UI.toast(e.message, 'error');
+      this.renderOrdersTable();
     }
   },
 

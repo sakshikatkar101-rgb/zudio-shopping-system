@@ -211,6 +211,120 @@ $health = Invoke-RestMethod -Uri "$baseUrl/health" -Method Get
 Assert-Test "GET /health probe" ($health.status -eq "UP" -and $health.db -eq "UP") "Status: $($health.status), DB: $($health.db)"
 
 # -------------------------------------------------------------------
+# TEST SUITE 9: Order Cancellation & ACID Inventory Restoration
+# -------------------------------------------------------------------
+Write-Host "`n>>> TEST SUITE 9: Order Cancellation & Inventory Stock Restoration" -ForegroundColor Yellow
+
+# 9.1: IDOR Cancellation Attempt (Sakshi attempts to cancel Rohit's order #1003)
+try {
+    $headers = @{ Authorization = "Bearer $customerToken"; "X-Forwarded-For" = $clientIp }
+    $cancelBody = @{ reason = "Malicious cancellation attempt" } | ConvertTo-Json
+    $resp = Invoke-WebRequest -Uri "$baseUrl/api/orders/1003/cancel" -Method Post -Headers $headers -Body $cancelBody -ContentType "application/json" -UseBasicParsing -ErrorAction Stop
+    Assert-Test "Anti-IDOR: Customer cancelling another user's order (#1003)" $false "Returned HTTP $($resp.StatusCode), expected 403 Forbidden"
+} catch {
+    $statusCode = $_.Exception.Response.StatusCode.value__
+    Assert-Test "Anti-IDOR: Customer cancelling another user's order (#1003)" ($statusCode -eq 403) "Blocked with HTTP $statusCode Forbidden"
+}
+
+# 9.2: Stock decrement, cancellation, and exact stock restoration
+# Fetch product #3 initial stock
+$prod3Initial = Invoke-RestMethod -Uri "$baseUrl/api/products/3" -Method Get
+$initialStock = $prod3Initial.data.stock
+Write-Host "        Product #3 Initial Stock: $initialStock" -ForegroundColor DarkGray
+
+# Add product #3 (qty 2) to cart
+$addCart3 = @{ productId = 3; size = "M"; quantity = 2 } | ConvertTo-Json
+Invoke-RestMethod -Uri "$baseUrl/api/cart" -Method Post -Headers @{ Authorization = "Bearer $customerToken"; "X-Forwarded-For" = $clientIp } -Body $addCart3 -ContentType "application/json" | Out-Null
+
+# Place Order with CARD payment simulation
+$cardOrderBody = @{
+    paymentMethod = "CARD";
+    paymentStatus = "PAID";
+    cardLast4 = "8890";
+    cardBrand = "Visa";
+    address = "42 Silicon Avenue, Outer Ring Road, Bengaluru 560103"
+} | ConvertTo-Json
+
+$placedCardOrder = Invoke-RestMethod -Uri "$baseUrl/api/orders" -Method Post -Headers @{ Authorization = "Bearer $customerToken"; "X-Forwarded-For" = $clientIp } -Body $cardOrderBody -ContentType "application/json"
+$cardOrderId = $placedCardOrder.data.id
+
+# Check stock after placement (should be initialStock - 2)
+$prod3AfterPlace = Invoke-RestMethod -Uri "$baseUrl/api/products/3" -Method Get
+$stockAfterPlace = $prod3AfterPlace.data.stock
+Assert-Test "Inventory Stock Decrement on Order Placement" ($stockAfterPlace -eq ($initialStock - 2)) "Stock decreased from $initialStock to $stockAfterPlace (-2)"
+
+# Check payment fields persisted
+Assert-Test "Simulated Card Details Persisted" ($placedCardOrder.data.paymentStatus -eq "PAID" -and $placedCardOrder.data.cardLast4 -eq "8890" -and $placedCardOrder.data.cardBrand -eq "Visa") "Payment Status: $($placedCardOrder.data.paymentStatus), Brand: $($placedCardOrder.data.cardBrand), Last4: $($placedCardOrder.data.cardLast4)"
+
+# Cancel Order via POST /api/orders/{id}/cancel
+$cancelPayload = @{ reason = "Found better discount elsewhere" } | ConvertTo-Json
+$cancelResp = Invoke-RestMethod -Uri "$baseUrl/api/orders/$cardOrderId/cancel" -Method Post -Headers @{ Authorization = "Bearer $customerToken"; "X-Forwarded-For" = $clientIp } -Body $cancelPayload -ContentType "application/json"
+
+Assert-Test "Order Cancellation Execution" ($cancelResp.success -eq $true -and $cancelResp.data.status -eq "Cancelled") "Order #$cardOrderId cancelled. Status: $($cancelResp.data.status)"
+Assert-Test "Online Order Refund Status" ($cancelResp.data.paymentStatus -eq "REFUND_PENDING") "Payment status set to REFUND_PENDING for online card order"
+Assert-Test "Cancel Reason Recorded" ($cancelResp.data.cancelReason -eq "Found better discount elsewhere") "Reason recorded: '$($cancelResp.data.cancelReason)'"
+
+# Verify stock restored back to initialStock
+$prod3AfterCancel = Invoke-RestMethod -Uri "$baseUrl/api/products/3" -Method Get
+$stockAfterCancel = $prod3AfterCancel.data.stock
+Assert-Test "Inventory Stock Restoration on Cancellation" ($stockAfterCancel -eq $initialStock) "Stock restored from $stockAfterPlace back to $stockAfterCancel (+2)"
+
+# 9.3: Double Cancellation Rejection
+try {
+    $doubleCancelResp = Invoke-WebRequest -Uri "$baseUrl/api/orders/$cardOrderId/cancel" -Method Post -Headers @{ Authorization = "Bearer $customerToken"; "X-Forwarded-For" = $clientIp } -Body $cancelPayload -ContentType "application/json" -UseBasicParsing -ErrorAction Stop
+    Assert-Test "Double Cancellation Defense" $false "Returned HTTP $($doubleCancelResp.StatusCode), expected 400 Bad Request"
+} catch {
+    $statusCode = $_.Exception.Response.StatusCode.value__
+    Assert-Test "Double Cancellation Defense" ($statusCode -eq 400) "Blocked duplicate cancellation with HTTP $statusCode Bad Request"
+}
+
+# 9.4: Non-Cancellable Status Rejection (Shipped / Delivered cannot be cancelled)
+# Create a new COD order
+$addCart4 = @{ productId = 1; size = "L"; quantity = 1 } | ConvertTo-Json
+Invoke-RestMethod -Uri "$baseUrl/api/cart" -Method Post -Headers @{ Authorization = "Bearer $customerToken"; "X-Forwarded-For" = $clientIp } -Body $addCart4 -ContentType "application/json" | Out-Null
+
+$codOrderBody = @{
+    paymentMethod = "COD";
+    address = "10 Downing Street, Colaba, Mumbai 400001"
+} | ConvertTo-Json
+$codOrder = Invoke-RestMethod -Uri "$baseUrl/api/orders" -Method Post -Headers @{ Authorization = "Bearer $customerToken"; "X-Forwarded-For" = $clientIp } -Body $codOrderBody -ContentType "application/json"
+$codOrderId = $codOrder.data.id
+
+# Admin logs in (try configured admin passwords)
+$adminPasswords = @(
+    $env:ADMIN_PASSWORD,
+    "admin123",
+    "Admin@Zudio2026!",
+    "Zudio@Admin#4827"
+) | Where-Object { $_ -ne $null -and $_ -ne "" }
+
+$adminToken = $null
+foreach ($p in $adminPasswords) {
+    try {
+        $body = @{ email = "admin@zudio.in"; password = $p } | ConvertTo-Json
+        $auth = Invoke-RestMethod -Uri "$baseUrl/api/auth/login" -Method Post -Headers @{ "X-Forwarded-For" = "127.0.0.1" } -Body $body -ContentType "application/json"
+        if ($auth.success -and $auth.data.token) {
+            $adminToken = $auth.data.token
+            break
+        }
+    } catch {}
+}
+Assert-Test "Admin Authentication" ($adminToken -ne $null) "Admin token acquired successfully"
+
+# Admin updates order status to 'Shipped'
+$shipPayload = @{ status = "Shipped" } | ConvertTo-Json
+Invoke-RestMethod -Uri "$baseUrl/api/admin/orders/$codOrderId" -Method Put -Headers @{ Authorization = "Bearer $adminToken"; "X-Forwarded-For" = "127.0.0.1" } -Body $shipPayload -ContentType "application/json" | Out-Null
+
+# Customer attempts to cancel Shipped order
+try {
+    $cancelShippedResp = Invoke-WebRequest -Uri "$baseUrl/api/orders/$codOrderId/cancel" -Method Post -Headers @{ Authorization = "Bearer $customerToken"; "X-Forwarded-For" = $clientIp } -Body $cancelPayload -ContentType "application/json" -UseBasicParsing -ErrorAction Stop
+    Assert-Test "Dispatched Order Cancellation Blocked" $false "Shipped order was cancelled, expected 400 rejection"
+} catch {
+    $statusCode = $_.Exception.Response.StatusCode.value__
+    Assert-Test "Dispatched Order Cancellation Blocked" ($statusCode -eq 400) "Shipped order cancellation rejected with HTTP $statusCode"
+}
+
+# -------------------------------------------------------------------
 # SUMMARY
 # -------------------------------------------------------------------
 Write-Host "`n========================================================" -ForegroundColor Cyan

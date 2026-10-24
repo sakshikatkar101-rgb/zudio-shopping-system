@@ -192,9 +192,48 @@ public class DatabaseUtil {
             // Dynamically seed or ensure Administrator & Sample Customer accounts with PBKDF2 hashes
             ensureDefaultUsers(conn);
 
+            // Apply incremental migrations (e.g. payment_status, cancel_reason, etc.)
+            applyMigrations(conn);
+
         } catch (SQLException e) {
             System.err.println("[DB ERROR during schema setup]: " + e.getMessage());
             throw new RuntimeException("Database initialization failed", e);
+        }
+    }
+
+    /**
+     * Applies safe, idempotent database migrations for existing databases.
+     */
+    private static void applyMigrations(Connection conn) {
+        ensureColumnExists(conn, "orders", "payment_status", "VARCHAR(30) NOT NULL DEFAULT 'PENDING'");
+        ensureColumnExists(conn, "orders", "cancel_reason", "VARCHAR(255) NULL");
+        ensureColumnExists(conn, "orders", "cancelled_at", "TIMESTAMP NULL");
+        ensureColumnExists(conn, "orders", "card_last4", "VARCHAR(4) NULL");
+        ensureColumnExists(conn, "orders", "card_brand", "VARCHAR(20) NULL");
+    }
+
+    private static void ensureColumnExists(Connection conn, String table, String column, String definition) {
+        try {
+            boolean colExists = false;
+            String checkSql = "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?";
+            try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
+                ps.setString(1, table);
+                ps.setString(2, column);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        colExists = true;
+                    }
+                }
+            }
+            if (!colExists) {
+                System.out.println("[DB Migration] Adding column '" + column + "' to table '" + table + "'...");
+                String alterSql = "ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition;
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute(alterSql);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[DB Migration Notice]: " + e.getMessage());
         }
     }
 

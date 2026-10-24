@@ -30,6 +30,11 @@ public class OrderService {
      * Any client-sent prices/totals are completely disregarded.
      */
     public Order checkout(int userId, String paymentMethod, String address, String couponCode) throws Exception {
+        return checkout(userId, paymentMethod, address, couponCode, null, null, null);
+    }
+
+    public Order checkout(int userId, String paymentMethod, String address, String couponCode,
+                          String paymentStatus, String cardLast4, String cardBrand) throws Exception {
         // 1. Validate Address
         if (address == null || address.trim().length() < 10 || address.trim().length() > 500) {
             throw new IllegalArgumentException("Please enter a valid complete delivery address (between 10 and 500 characters).");
@@ -95,7 +100,7 @@ public class OrderService {
             finalTotal = BigDecimal.ZERO;
         }
 
-        return orderDAO.placeOrder(userId, finalTotal, computedDiscount, cleanMethod, address.trim(), items);
+        return orderDAO.placeOrder(userId, finalTotal, computedDiscount, cleanMethod, address.trim(), items, paymentStatus, cardLast4, cardBrand);
     }
 
     public List<Order> getOrdersByUser(int userId) {
@@ -113,13 +118,39 @@ public class OrderService {
         return order;
     }
 
-    public boolean updateStatus(int orderId, String newStatus) {
+    public Order cancelOrder(int orderId, int userId, boolean isAdmin, String reason) throws Exception {
+        Order existing = orderDAO.findById(orderId);
+        if (existing == null) {
+            throw new IllegalArgumentException("Order #" + orderId + " does not exist.");
+        }
+
+        // Strict ownership check (Customer can only cancel their own order; Admin can cancel any)
+        if (!isAdmin && existing.getUserId() != userId) {
+            throw new SecurityException("Access Denied: You are not authorized to cancel order #" + orderId);
+        }
+
+        // Validate status allows cancellation (only Placed or Packed)
+        if ("Cancelled".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Order #" + orderId + " has already been cancelled.");
+        }
+        if (!"Placed".equalsIgnoreCase(existing.getStatus()) && !"Packed".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Order #" + orderId + " cannot be cancelled as it is already " + existing.getStatus() + ".");
+        }
+
+        return orderDAO.cancelOrder(orderId, reason);
+    }
+
+    public boolean updateStatus(int orderId, String newStatus) throws Exception {
         if (newStatus == null || newStatus.isBlank()) {
             throw new IllegalArgumentException("Order status cannot be empty.");
         }
         Set<String> validStatuses = Set.of("Placed", "Packed", "Shipped", "Delivered", "Cancelled");
         if (!validStatuses.contains(newStatus)) {
             throw new IllegalArgumentException("Invalid order status: " + newStatus);
+        }
+        if ("Cancelled".equalsIgnoreCase(newStatus)) {
+            cancelOrder(orderId, -1, true, "Cancelled by Administrator");
+            return true;
         }
         return orderDAO.updateStatus(orderId, newStatus);
     }
