@@ -3,8 +3,7 @@
 -- Database Schema (MySQL 8.x Compatible)
 -- =======================================================
 
-CREATE DATABASE IF NOT EXISTS zudio_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE zudio_db;
+-- Tables inherit active database from connection URL (Aiven / Cloud MySQL compatible)
 
 -- 1. Users Table
 CREATE TABLE IF NOT EXISTS users (

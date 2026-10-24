@@ -3,7 +3,7 @@
 -- Seed Data: Categories, Products, Users, Coupons, Orders
 -- =======================================================
 
-USE zudio_db;
+-- Seed Data for active database connection (Aiven / Cloud MySQL compatible)
 
 -- 1. Seed Categories
 INSERT INTO categories (id, name, description, image_url) VALUES

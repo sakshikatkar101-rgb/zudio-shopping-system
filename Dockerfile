@@ -38,6 +38,9 @@ COPY --from=builder --chown=zudio:zudio /build/target/zudio.jar /app/zudio.jar
 
 USER zudio
 
+# Set default memory limit for Render 512MB RAM free tier
+ENV JAVA_TOOL_OPTIONS="-Xmx350m"
+
 # Expose default HTTP server port
 EXPOSE 8080
 

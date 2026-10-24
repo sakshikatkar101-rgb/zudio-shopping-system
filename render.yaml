@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: zudio-shopping
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: JAVA_TOOL_OPTIONS
+        value: -Xmx350m
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: TOKEN_SECRET
+        sync: false
+      - key: ALLOWED_ORIGIN
+        value: "*"
