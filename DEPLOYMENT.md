@@ -1,10 +1,15 @@
 # ZUDIO Production Deployment Guide
 
-This guide provides step-by-step instructions to deploy the **ZUDIO Online Shopping Management System** to production environments, cloud providers (Render / Railway), and local Docker containers.
+## 🌐 Live Production Deployment
+- **Live URL:** [https://zudio-shopping.onrender.com](https://zudio-shopping.onrender.com)
+- **Health Check Probe:** [https://zudio-shopping.onrender.com/health](https://zudio-shopping.onrender.com/health) (Returns `{"status":"UP","db":"UP"}`)
+- **Hosting Platform:** Render Web Service (Free Tier, Docker Runtime, US Oregon)
+- **Production Database:** Aiven Cloud Managed MySQL 8.4.11 (`sslMode=REQUIRED` TLS encryption)
+- **Repository:** [https://github.com/sakshikatkar101-rgb/zudio-shopping-system](https://github.com/sakshikatkar101-rgb/zudio-shopping-system)
 
 ---
 
-## 1. Running Locally with Docker Compose
+## 1. Cloud Architecture Overview
 
 Running the entire stack (Application + MySQL 8.4 Database) locally requires only Docker and Docker Compose.
 

@@ -1,5 +1,14 @@
 # ZUDIO – Online Shopping Management System 🛍️
-> A complete, lightweight, full-stack web application inspired by the trendy Indian fast-fashion retail brand **Zudio**. Engineered with **Core Java 17+ (built-in `HttpServer`)**, **pure JDBC**, **MySQL 8**, and **vanilla HTML5/CSS3/JavaScript (ES6+)**.
+> A complete, lightweight, full-stack web application inspired by the trendy Indian fast-fashion retail brand **Zudio**. Engineered with **Core Java 17+ (built-in `HttpServer`)**, **pure JDBC**, **MySQL 8.4**, and **vanilla HTML5/CSS3/JavaScript (ES6+)**.
+
+---
+
+## 🌐 Live Production Deployment
+- **Live Application URL:** [https://zudio-shopping.onrender.com](https://zudio-shopping.onrender.com)
+- **Live Healthcheck Endpoint:** [https://zudio-shopping.onrender.com/health](https://zudio-shopping.onrender.com/health) (Returns `{"status":"UP","db":"UP"}`)
+- **Cloud Host:** Render Web Service (Free Tier, Docker Runtime)
+- **Managed Database:** Aiven Cloud MySQL 8.4.11 with strict TLS encryption (`sslMode=REQUIRED`)
+- **Source Repository:** [sakshikatkar101-rgb/zudio-shopping-system](https://github.com/sakshikatkar101-rgb/zudio-shopping-system)
 
 ---
 
