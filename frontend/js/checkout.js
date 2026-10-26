@@ -233,6 +233,9 @@ const Checkout = {
                 <span>Express Delivery</span>
                 <span>${Number(Cart.data.shipping) === 0 ? '<strong style="color: var(--accent-success);">FREE</strong>' : '₹' + Number(Cart.data.shipping).toFixed(2)}</span>
               </div>
+              <div style="font-size: 0.78rem; color: var(--accent-success); margin-top: -4px;">
+                🚚 Estimated Delivery: <strong>3–5 Business Days</strong>
+              </div>
               <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.25rem; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--border-medium);">
                 <span>Total Amount</span>
                 <span style="color: var(--accent-primary); font-family: var(--font-brand);">₹${Number(Cart.data.total || 0).toFixed(2)}</span>
@@ -242,6 +245,13 @@ const Checkout = {
             <button id="btn-place-order" class="btn btn-primary btn-block" style="margin-top: 24px; padding: 16px;" onclick="Checkout.placeOrder()">
               Place Order Now (₹${Number(Cart.data.total || 0).toFixed(2)})
             </button>
+
+            <!-- Delivery & Refund Guarantee Callout -->
+            <div style="margin-top: 16px; padding: 12px; background: var(--bg-surface); border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px;">
+              <div>🚚 <strong>Delivery:</strong> Guaranteed doorstep delivery within <strong>3–5 business days</strong>.</div>
+              <div>↩️ <strong>Refunds:</strong> Cancel anytime before dispatch; refunds credited in <strong>3–5 business days</strong>.</div>
+            </div>
+
             <div style="text-align: center; margin-top: 12px; font-size: 0.75rem; color: var(--text-muted);">
               🔒 256-Bit SSL Encrypted & ACID DB Transaction Protected
             </div>

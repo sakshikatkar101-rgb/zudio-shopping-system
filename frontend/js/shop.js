@@ -300,8 +300,8 @@ const Shop = {
             <!-- Features / Shipping badges -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 12px;">
               <div>⚡ Free Delivery on ₹999+</div>
-              <div>🔄 14-Day Easy Exchange</div>
-              <div>🛡️ 100% Genuine Quality</div>
+              <div>🚚 Delivery in 3–5 Business Days</div>
+              <div>↩️ Easy Cancellation & Refund (3–5 Days)</div>
               <div>💳 Cash on Delivery Available</div>
             </div>
           </div>

@@ -98,15 +98,18 @@ const Orders = {
           <div class="cancel-reason-callout" style="margin: 18px 0 12px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
               <strong style="color: var(--accent-danger); font-size: 0.9rem;">🚫 Order Cancelled on ${UI.escapeHtml(cancelledDateStr)}</strong>
-              ${order.paymentMethod !== 'COD' ? '<span class="badge-payment badge-refund">Simulated Refund Initiated</span>' : ''}
+              ${order.paymentMethod !== 'COD' ? '<span class="badge-payment badge-refund">Refund in 3–5 Business Days</span>' : ''}
             </div>
             <div style="color: var(--text-secondary); margin-top: 4px;">
               <strong>Reason:</strong> "${UI.escapeHtml(order.cancelReason || 'Customer requested cancellation')}"
             </div>
             ${order.paymentMethod !== 'COD' ? `
-              <div style="font-size: 0.78rem; color: var(--accent-primary); margin-top: 4px;">
-                💡 A simulated refund of ₹${Number(order.totalAmount).toFixed(2)} has been queued to your original ${UI.escapeHtml(order.paymentMethod)} account.
-              </div>` : ''}
+              <div style="font-size: 0.82rem; color: #A78BFA; margin-top: 6px; padding: 6px 12px; background: rgba(139, 92, 246, 0.12); border-radius: 4px;">
+                💰 <strong>Refund Timeline:</strong> A full refund of <strong>₹${Number(order.totalAmount).toFixed(2)}</strong> has been initiated to your original ${UI.escapeHtml(order.paymentMethod)} account (simulated). Funds will reflect in your account within <strong>3 to 5 business days</strong>.
+              </div>` : `
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                💵 <strong>Cash on Delivery:</strong> No advance payment was collected, so no refund is needed.
+              </div>`}
           </div>
         `;
       } else {
@@ -130,6 +133,20 @@ const Orders = {
         `;
       }
 
+      // Calculate estimated delivery: 4 days from order date
+      const orderDate = new Date(order.createdAt);
+      const estDeliveryDate = new Date(orderDate.getTime() + 4 * 24 * 60 * 60 * 1000);
+      const estDeliveryStr = estDeliveryDate.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+
+      let deliveryStatusSubtitle = '';
+      if (order.status === 'Delivered') {
+        deliveryStatusSubtitle = `<span style="color: var(--accent-success); font-weight: 600;">✅ Delivered successfully</span>`;
+      } else if (isCancelled) {
+        deliveryStatusSubtitle = `<span style="color: var(--accent-danger);">🚫 Order Cancelled</span>`;
+      } else {
+        deliveryStatusSubtitle = `<span style="color: var(--accent-success); font-weight: 600;">🚚 Estimated Delivery: <strong>${estDeliveryStr}</strong> (3–5 business days)</span>`;
+      }
+
       return `
         <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: var(--space-xl); box-shadow: var(--shadow-sm);">
           <!-- Order Card Header -->
@@ -140,8 +157,10 @@ const Orders = {
                 <span class="status-pill status-${order.status}">${order.status}</span>
                 ${paymentBadgeHtml}
               </div>
-              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
-                Placed on: ${new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                <span>Placed on: ${new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                <span>•</span>
+                ${deliveryStatusSubtitle}
               </div>
             </div>
 
@@ -220,10 +239,14 @@ const Orders = {
           <strong>${UI.escapeHtml(order.paymentMethod)}</strong>
         </div>
         ${isOnlinePaid ? `
-          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-medium); color: var(--accent-primary); font-size: 0.8rem;">
-            💡 <strong>Simulated Refund:</strong> A full refund of ₹${Number(order.totalAmount).toFixed(2)} will be initiated to your ${UI.escapeHtml(order.paymentMethod)} account.
+          <div style="margin-top: 10px; padding: 10px 12px; background: rgba(139, 92, 246, 0.12); border-radius: var(--radius-xs); border-left: 3px solid #8B5CF6; color: var(--text-main); font-size: 0.82rem;">
+            💰 <strong>Refund in 3–5 Business Days:</strong> A full refund of ₹${Number(order.totalAmount).toFixed(2)} will be initiated to your ${UI.escapeHtml(order.paymentMethod)} account. It typically reflects in your bank account within <strong>3 to 5 business days</strong>.
           </div>
-        ` : ''}
+        ` : `
+          <div style="margin-top: 10px; padding: 8px 12px; background: rgba(245, 158, 11, 0.08); border-radius: var(--radius-xs); border-left: 3px solid #F59E0B; color: var(--text-muted); font-size: 0.8rem;">
+            💵 <strong>Cash on Delivery:</strong> No payment has been deducted.
+          </div>
+        `}
       </div>
 
       <div style="margin-bottom: 20px;">
